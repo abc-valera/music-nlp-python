@@ -1,0 +1,4 @@
+{
+  "python.defaultInterpreterPath": "local/venv/bin/python",
+  "ruff.configuration": ".config/ruff.toml"
+}

@@ -1,0 +1,38 @@
+{
+  "name": "Music NLP Dev Container",
+
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/remote/workspace/music-nlp,type=bind",
+  "workspaceFolder": "/home/remote/workspace/music-nlp",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
+  "forwardPorts": [3000, 3001, 3002, 3003],
+
+  "remoteUser": "remote",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "njpwerner.autodocstring",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.vscode-jupyter-cell-tags",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+        "ms-toolsai.vscode-jupyter-slideshow",
+        "ms-vscode.makefile-tools",
+        "esbenp.prettier-vscode",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "kevinrose.vsc-python-indent",
+        "charliermarsh.ruff",
+        "gruntfuggly.todo-tree"
+      ]
+    }
+  }
+}
