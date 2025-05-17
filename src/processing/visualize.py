@@ -25,18 +25,8 @@ def visualize_vectors(
 
     plt.figure(figsize=figsize)
 
-    n_colors = len(unique_composers)
-    palette = sns.color_palette("hls", n_colors)
-
-    optimized_palette = []
-    indices = []
-    phi = (1 + 5**0.5) / 2  # Golden ratio
-    for i in range(n_colors):
-        index = int((i * phi * n_colors) % n_colors)
-        indices.append(index)
-        optimized_palette.append(palette[index])
-
-    palette = optimized_palette
+    # use default seaborn color palette
+    palette = sns.color_palette("tab10")
 
     plt.figure(figsize=figsize)
     for i, composer in enumerate(unique_composers):

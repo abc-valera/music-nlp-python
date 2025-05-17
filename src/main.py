@@ -21,6 +21,7 @@ logging.info("The script has started...")
 
 
 dataset = data.new_dataset()
+dataset = data.filter_dataset(dataset)
 logging.info("Dataset loaded")
 
 
@@ -132,3 +133,55 @@ processing.visualize_vectors(
     title="t-SNE Visualization of AVG+COV vectors",
     save_path=os.path.join(cache.FOLDER_PATH, "tsne_avg_cov.png"),
 )
+
+
+# from sklearn.cluster import KMeans
+# import numpy as np
+
+# n_clusters = len(dataset["canonical_composer"].unique())
+
+# kmeans_avg = KMeans(n_clusters=n_clusters, random_state=42)
+# clusters_avg = kmeans_avg.fit_predict(np.array(vectors_avg))
+# logging.info("KMeans clustering on AVG vectors complete.")
+
+# kmeans_cov = KMeans(n_clusters=n_clusters, random_state=42)
+# clusters_cov = kmeans_cov.fit_predict(np.array(vectors_cov))
+# logging.info("KMeans clustering on COV vectors complete.")
+
+# kmeans_avg_cov = KMeans(n_clusters=n_clusters, random_state=42)
+# clusters_avg_cov = kmeans_avg_cov.fit_predict(np.array(vectors_avg_cov))
+# logging.info("KMeans clustering on AVG+COV vectors complete.")
+
+# # Optionally, save clustering results
+# CLUSTERS_AVG_FILEPATH = os.path.join(cache.FOLDER_PATH, "clusters_avg.pkl")
+# CLUSTERS_COV_FILEPATH = os.path.join(cache.FOLDER_PATH, "clusters_cov.pkl")
+# CLUSTERS_AVG_COV_FILEPATH = os.path.join(cache.FOLDER_PATH, "clusters_avg_cov.pkl")
+
+# with open(CLUSTERS_AVG_FILEPATH, "wb") as f:
+#     pickle.dump(clusters_avg, f)
+# with open(CLUSTERS_COV_FILEPATH, "wb") as f:
+#     pickle.dump(clusters_cov, f)
+# with open(CLUSTERS_AVG_COV_FILEPATH, "wb") as f:
+#     pickle.dump(clusters_avg_cov, f)
+
+# logging.info("Clustering results saved.")
+
+
+# processing.visualize_vectors(
+#     data_vectors=processing.scale_vectors(vectors_avg),
+#     labels=clusters_avg,
+#     title="t-SNE Visualization of AVG vectors with KMeans Clustering",
+#     save_path=os.path.join(cache.FOLDER_PATH, "tsne_avg_kmeans.png"),
+# )
+# processing.visualize_vectors(
+#     data_vectors=processing.scale_vectors(vectors_cov),
+#     labels=clusters_cov,
+#     title="t-SNE Visualization of COV vectors with KMeans Clustering",
+#     save_path=os.path.join(cache.FOLDER_PATH, "tsne_cov_kmeans.png"),
+# )
+# processing.visualize_vectors(
+#     data_vectors=processing.scale_vectors(vectors_avg_cov),
+#     labels=clusters_avg_cov,
+#     title="t-SNE Visualization of AVG+COV vectors with KMeans Clustering",
+#     save_path=os.path.join(cache.FOLDER_PATH, "tsne_avg_cov_kmeans.png"),
+# )
