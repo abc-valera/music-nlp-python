@@ -1,4 +1,9 @@
 {
   "python.defaultInterpreterPath": "local/venv/bin/python",
-  "ruff.configuration": ".config/ruff.toml"
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.activateEnvInCurrentTerminal": true,
+
+  "ruff.configuration": ".config/ruff.toml",
+
+  "python.analysis.typeCheckingMode": "standard"
 }

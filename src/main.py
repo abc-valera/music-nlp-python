@@ -1,30 +1,13 @@
 import os
-import numpy as np
-import pandas as pd
 import gensim
 import pickle
 import logging
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-
-from song_encoding import write_corpus_to_file
-from dataset import new_dataset, DATA_FOLDER_PATH
-from processing import (
-    tokenize,
-    vectorize_avg,
-    vectorize_cov,
-    vectorize_avg_with_cov,
-)
-import visualize
-
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.manifold import TSNE
-from collections import Counter
 
 
-CACHE_FOLDER_PATH = "local/cache"
-CORPUS_FILEPATH = os.path.join(CACHE_FOLDER_PATH, "corpus.txt")
+import data
+import song_encoding
+import processing
+import cache
 
 
 logging.basicConfig(
@@ -34,30 +17,58 @@ logging.basicConfig(
 )
 
 
-logging.info("Loading dataset...")
-dataset = new_dataset(os.path.join(DATA_FOLDER_PATH, "maestro-v3.0.0.csv"))
-logging.info("Dataset loaded.")
+logging.info("The script has started...")
 
 
-logging.info("Writing corpus...")
-write_corpus_to_file(dataset, CORPUS_FILEPATH)
-logging.info("Corpus written.")
+dataset = data.new_dataset()
+logging.info("Dataset loaded")
 
 
-logging.info("Tokenizing songs...")
-tokenized_songs = tokenize(
-    corpus_filepath=CORPUS_FILEPATH,
-    modelName=os.path.join(CACHE_FOLDER_PATH, "spm"),
-    vocabSize=13_000,
-    maxSenLength=100_000,
-)
-logging.info("Tokenization complete.")
+CORPUS_FILEPATH = os.path.join(cache.FOLDER_PATH, "corpus.txt")
+NOTE2CHAR_FILEPATH = os.path.join(cache.FOLDER_PATH, "note2char.pkl")
+CHAR2NOTE_FILEPATH = os.path.join(cache.FOLDER_PATH, "char2note.pkl")
+if (
+    os.path.exists(CORPUS_FILEPATH)
+    and os.path.exists(NOTE2CHAR_FILEPATH)
+    and os.path.exists(NOTE2CHAR_FILEPATH)
+):
+    logging.info("Corpus already exists, skipping creation.")
+else:
+    corpus, note2char, char2note = song_encoding.create_corpus(dataset)
+
+    with open(CORPUS_FILEPATH, "w", encoding="utf-8") as f:
+        f.write(corpus)
+    with open(NOTE2CHAR_FILEPATH, "wb") as f:
+        pickle.dump(note2char, f)
+    with open(CHAR2NOTE_FILEPATH, "wb") as f:
+        pickle.dump(char2note, f)
+
+    logging.info("Corpus created")
 
 
-logging.info("Training Word2Vec model...")
-word2vec_path = os.path.join(CACHE_FOLDER_PATH, "word2vec.model")
-if os.path.exists(word2vec_path):
-    word2vec = gensim.models.Word2Vec.load(word2vec_path)
+TOKENIZED_SONGS_FILEPATH = os.path.join(cache.FOLDER_PATH, "tokenized_songs.pkl")
+if os.path.exists(TOKENIZED_SONGS_FILEPATH):
+    with open(TOKENIZED_SONGS_FILEPATH, "rb") as f:
+        tokenized_songs = pickle.load(f)
+
+    logging.info("Tokenized songs already exist, skipping tokenization.")
+else:
+    tokenized_songs = processing.tokenize(
+        corpus_filepath=CORPUS_FILEPATH,
+        vocabSize=20_000,
+        maxSenLength=100_000,
+    )
+
+    with open(TOKENIZED_SONGS_FILEPATH, "wb") as f:
+        pickle.dump(tokenized_songs, f)
+
+    logging.info("Tokenization complete")
+
+
+WORD2VEC_FILEPATH = os.path.join(cache.FOLDER_PATH, "word2vec.model")
+if os.path.exists(WORD2VEC_FILEPATH):
+    word2vec = gensim.models.Word2Vec.load(WORD2VEC_FILEPATH)
+    logging.info("Word2Vec model loaded.")
 else:
     word2vec = gensim.models.Word2Vec(
         sentences=tokenized_songs,
@@ -66,117 +77,58 @@ else:
         workers=4,
         sg=1,
     )
-    word2vec.save(word2vec_path)
-logging.info("Word2Vec model trained.")
+    word2vec.save(WORD2VEC_FILEPATH)
+
+    logging.info("Word2Vec model trained and saved.")
 
 
-logging.info("Vectorizing songs...")
-
-# songs_vectors_avg_path = os.path.join(CACHE_FOLDER_PATH, "songs_vectors_avg.pkl")
-# if os.path.exists(songs_vectors_avg_path):
-#     with open(songs_vectors_avg_path, "rb") as f:
-#         songs_vectors = pickle.load(f)
-# else:
-#     songs_vectors = vectorize_avg(tokenized_songs, word2vec)
-#     with open(songs_vectors_avg_path, "wb") as f:
-#         pickle.dump(songs_vectors, f)
-
-
-songs_vectors_cov_path = os.path.join(CACHE_FOLDER_PATH, "songs_vectors_cov.pkl")
-if os.path.exists(songs_vectors_cov_path):
-    with open(songs_vectors_cov_path, "rb") as f:
-        songs_vectors = pickle.load(f)
+SONGS_VECTORS_AVG_FILEPATH = os.path.join(cache.FOLDER_PATH, "songs_vectors_avg.pkl")
+if os.path.exists(SONGS_VECTORS_AVG_FILEPATH):
+    with open(SONGS_VECTORS_AVG_FILEPATH, "rb") as f:
+        vectors_avg = pickle.load(f)
 else:
-    songs_vectors = vectorize_cov(tokenized_songs, word2vec)
-    with open(songs_vectors_cov_path, "wb") as f:
-        pickle.dump(songs_vectors, f)
-
-# songs_vectors_avg_cov_path = os.path.join(CACHE_FOLDER_PATH, "songs_vectors_avg_cov.pkl")
-# if os.path.exists(songs_vectors_avg_cov_path):
-#     with open(songs_vectors_avg_cov_path, "rb") as f:
-#         songs_vectors = pickle.load(f)
-# else:
-#     songs_vectors = vectorize_avg_with_cov(tokenized_songs, word2vec)
-#     with open(songs_vectors_avg_cov_path, "wb") as f:
-#         pickle.dump(songs_vectors, f)
-
-logging.info("Vectorization complete.")
+    vectors_avg = processing.vectorize_avg(tokenized_songs, word2vec)
+    with open(SONGS_VECTORS_AVG_FILEPATH, "wb") as f:
+        pickle.dump(vectors_avg, f)
 
 
-PredictorScaler = StandardScaler()
-PredictorScalerFit = PredictorScaler.fit(songs_vectors)
-
-scaled_songs_vectors = PredictorScalerFit.transform(songs_vectors)
-
-composers = dataset["canonical_composer"].to_list()
-
-
-def tsne_visualize(
-    data_vectors: np.ndarray,
-    labels: list,
-    title: str = "t-SNE Visualization of Music Data",
-    save_path: str = None,
-    perplexity: int = 30,
-    random_state: int = 42,
-    figsize: tuple = (12, 10),
-):
-    # Convert labels to unique numerical indices
-    unique_composers = sorted(list(set(labels)))
-    label_to_index = {composer: i for i, composer in enumerate(unique_composers)}
-    numeric_labels = np.array([label_to_index[composer] for composer in labels])
-
-    # Print dataset information
-    print(f"Number of data points: {len(data_vectors)}")
-    print(f"Number of unique composers: {len(unique_composers)}")
-    print("Composers and counts:")
-    composer_counts = Counter(labels)
-    for composer, count in sorted(composer_counts.items(), key=lambda x: x[1], reverse=True):
-        print(f"  {composer}: {count}")
-
-    # Perform t-SNE dimensionality reduction
-    print(f"Performing t-SNE with perplexity={perplexity}...")
-    tsne = TSNE(n_components=2, perplexity=perplexity, random_state=random_state)
-    embedded_vectors = tsne.fit_transform(data_vectors)
-
-    # Create plot
-    plt.figure(figsize=figsize)
-
-    # Plot each composer with a different color
-    for i, composer in enumerate(unique_composers):
-        mask = numeric_labels == i
-        plt.scatter(
-            embedded_vectors[mask, 0],
-            embedded_vectors[mask, 1],
-            label=composer,
-            alpha=0.7,
-            s=50,  # Point size
-        )
-
-    # Add labels and formatting
-    plt.title(title, fontsize=16)
-    plt.xlabel("t-SNE dimension 1", fontsize=12)
-    plt.ylabel("t-SNE dimension 2", fontsize=12)
-    plt.grid(alpha=0.3)
-
-    # Add legend with appropriate positioning
-    if len(unique_composers) > 10:
-        plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), fontsize=10)
-    else:
-        plt.legend(fontsize=10)
-
-    plt.tight_layout()
-
-    # Save figure if path is provided
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches="tight")
-        print(f"Figure saved to {save_path}")
-
-    plt.show()
+SONGS_VECTORS_COV_FILEPATH = os.path.join(cache.FOLDER_PATH, "songs_vectors_cov.pkl")
+if os.path.exists(SONGS_VECTORS_COV_FILEPATH):
+    with open(SONGS_VECTORS_COV_FILEPATH, "rb") as f:
+        vectors_cov = pickle.load(f)
+else:
+    vectors_cov = processing.vectorize_cov(tokenized_songs, word2vec)
+    with open(SONGS_VECTORS_COV_FILEPATH, "wb") as f:
+        pickle.dump(vectors_cov, f)
 
 
-tsne_visualize(
-    data_vectors=scaled_songs_vectors,
-    labels=composers,
-    title="t-SNE Visualization of Composer Music Styles",
-    save_path=os.path.join(CACHE_FOLDER_PATH, "tsne_visualization_cov.png"),
+SONGS_VECTORS_AVG_COV_FILEPATH = os.path.join(cache.FOLDER_PATH, "songs_vectors_avg_cov.pkl")
+if os.path.exists(SONGS_VECTORS_AVG_COV_FILEPATH):
+    with open(SONGS_VECTORS_AVG_COV_FILEPATH, "rb") as f:
+        vectors_avg_cov = pickle.load(f)
+else:
+    vectors_avg_cov = processing.vectorize_avg_cov(tokenized_songs, word2vec)
+    with open(SONGS_VECTORS_AVG_COV_FILEPATH, "wb") as f:
+        pickle.dump(vectors_avg_cov, f)
+
+
+processing.visualize_vectors(
+    data_vectors=processing.scale_vectors(vectors_avg),
+    labels=dataset["canonical_composer"].to_list(),
+    title="t-SNE Visualization of AVG vectors",
+    save_path=os.path.join(cache.FOLDER_PATH, "tsne_avg.png"),
+)
+
+processing.visualize_vectors(
+    data_vectors=processing.scale_vectors(vectors_cov),
+    labels=dataset["canonical_composer"].to_list(),
+    title="t-SNE Visualization of COV vectors",
+    save_path=os.path.join(cache.FOLDER_PATH, "tsne_cov.png"),
+)
+
+processing.visualize_vectors(
+    data_vectors=processing.scale_vectors(vectors_avg_cov),
+    labels=dataset["canonical_composer"].to_list(),
+    title="t-SNE Visualization of AVG+COV vectors",
+    save_path=os.path.join(cache.FOLDER_PATH, "tsne_avg_cov.png"),
 )

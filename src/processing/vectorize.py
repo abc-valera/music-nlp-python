@@ -9,6 +9,7 @@ def vectorize_avg(tokenized_sentences, model):
         desc="Vectorizing sentences with average",
         unit="sentence",
     ):
+        temp = np.zeros(0)
         for word in sentence:
             temp = np.zeros(len(model.wv[word]))
             temp += model.wv[word]
@@ -34,7 +35,7 @@ def vectorize_cov(tokenized_sentences, model):
     return vectorized_sentences
 
 
-def vectorize_avg_with_cov(tokenized_sentences, model):
+def vectorize_avg_cov(tokenized_sentences, model):
     vectorized_sentences = []
     cov = []
     for sentence in tqdm(
@@ -42,6 +43,7 @@ def vectorize_avg_with_cov(tokenized_sentences, model):
         desc="Vectorizing sentences with average and covariance",
         unit="sentence",
     ):
+        temp = np.zeros(0)
         for word in sentence:
             temp = np.zeros(len(model.wv[word]))
             temp += model.wv[word]

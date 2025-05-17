@@ -1,5 +1,5 @@
-from .corpus import write_corpus_to_file
+from .corpus import create_corpus
 
 __all__ = [
-    "write_corpus_to_file",
+    "create_corpus",
 ]

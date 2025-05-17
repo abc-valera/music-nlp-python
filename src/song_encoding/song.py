@@ -2,6 +2,7 @@ import pretty_midi
 from .note import Note
 
 
+# TODO: make chord timeout bigger
 CHORD_TIMEOUT = 0.003
 
 
@@ -23,6 +24,7 @@ class Song(list[Note]):
         for i, midi_note in enumerate(sorted_midi_notes):
             note_gram = Note(
                 pitch=midi_note.pitch,
+                velocity=midi_note.velocity,
                 duration=midi_note.end - midi_note.start,
             )
 
