@@ -1,5 +1,8 @@
-start:
-	PYTHONPYCACHEPREFIX=local/__pycache__ python src/main.py
+vectorize:
+	PYTHONPYCACHEPREFIX=local/__pycache__ python src/vectorize.py
+
+classify:
+	PYTHONPYCACHEPREFIX=local/__pycache__ python src/classify.py
 
 download_maestro_dataset:
 	wget https://storage.googleapis.com/magentadata/datasets/maestro/v3.0.0/maestro-v3.0.0-midi.zip

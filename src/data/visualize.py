@@ -6,10 +6,8 @@ import cache
 
 
 def composer_song_counts(dataset: pd.DataFrame) -> None:
-    composer_counts = dataset["canonical_composer"].value_counts()
-
+    composer_counts = dataset["canonical_composer"].value_counts().head(10).iloc[::-1]
     plt.figure(figsize=(10, max(6, len(composer_counts) * 0.4)))
-
     bars = plt.barh(composer_counts.index, composer_counts.values.astype(float), height=0.7)
     for bar in bars:
         plt.text(
@@ -18,11 +16,9 @@ def composer_song_counts(dataset: pd.DataFrame) -> None:
             str(int(bar.get_width())),
             va="center",
         )
-
-    plt.title("Number of Pieces per Composer", fontsize=14)
+    plt.title("Number of Pieces per Composer (Top 10)", fontsize=14)
     plt.xlabel("Number of Pieces")
     plt.tight_layout()
-
     plt.savefig(
         os.path.join(cache.FOLDER_PATH, "composer_song_counts.png"),
         dpi=300,
@@ -36,9 +32,8 @@ def song_durations(dataset: pd.DataFrame) -> None:
     mean_duration = dataset["duration"].mean()
     median_duration = dataset["duration"].median()
 
-    sns.histplot(duration_minutes.to_numpy(), bins=30, kde=True)
-
     plt.figure(figsize=(10, 6))
+    sns.histplot(duration_minutes.to_numpy(), bins=30, kde=True)
     plt.axvline(
         mean_duration / 60,
         color="r",
@@ -51,13 +46,11 @@ def song_durations(dataset: pd.DataFrame) -> None:
         linestyle=":",
         label=f"Median: {median_duration / 60:.1f} min",
     )
-
     plt.title("Distribution of Piece Durations", fontsize=14)
     plt.xlabel("Duration (minutes)")
     plt.ylabel("Count")
     plt.legend()
     plt.tight_layout()
-
     plt.savefig(
         os.path.join(cache.FOLDER_PATH, "song_durations.png"),
         dpi=300,

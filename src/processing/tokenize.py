@@ -3,7 +3,7 @@ import os
 import cache
 
 
-MODEL_NAME = os.path.join(cache.FOLDER_PATH, "spm")
+MODEL_NAME = os.path.join(cache.FOLDER_PATH, "2_spm")
 
 
 def tokenize(
