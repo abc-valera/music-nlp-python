@@ -13,7 +13,7 @@ def visualize_vectors(
     save_path: str,
     perplexity: int = 30,
     random_state: int = 42,
-    figsize: tuple = (12, 10),
+    figsize: tuple = (16, 8),
 ):
     unique_composers = sorted(list(set(labels)))
     label_to_index = {composer: i for i, composer in enumerate(unique_composers)}
@@ -24,11 +24,9 @@ def visualize_vectors(
     embedded_vectors = tsne.fit_transform(data_vectors)
 
     plt.figure(figsize=figsize)
-
     # use default seaborn color palette
     palette = sns.color_palette("tab10")
 
-    plt.figure(figsize=figsize)
     for i, composer in enumerate(unique_composers):
         mask = numeric_labels == i
         plt.scatter(
@@ -40,15 +38,8 @@ def visualize_vectors(
             s=50,  # Point size
         )
 
-    plt.title(title, fontsize=16)
-    plt.xlabel("t-SNE dimension 1", fontsize=12)
-    plt.ylabel("t-SNE dimension 2", fontsize=12)
     plt.grid(alpha=0.3)
-
-    plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), fontsize=10)
-
+    plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), fontsize=18)
     plt.tight_layout()
-
     plt.savefig(save_path, dpi=300, bbox_inches="tight")
-
     plt.close()

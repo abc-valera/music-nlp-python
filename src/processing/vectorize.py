@@ -21,18 +21,18 @@ def vectorize_avg(tokenized_sentences: list, model: Word2Vec) -> list:
     return vectorized_sentences
 
 
-def vectorize_cov(tokenized_sentences: list, model: Word2Vec) -> list:
+def vectorize_std(tokenized_sentences: list, model: Word2Vec) -> list:
     vectorized_sentences = []
 
     for sentence in tqdm(
         tokenized_sentences,
-        desc="Vectorizing sentences with covariance",
+        desc="Vectorizing sentences with standard deviation",
         unit="sentence",
     ):
-        cov = []
+        word_vectors = []
         for word in sentence:
-            cov.append(model.wv[word])
-        data = np.array(cov)
+            word_vectors.append(model.wv[word])
+        data = np.array(word_vectors)
         sd = np.std(data, axis=0)
         z = sd.tolist()
         z = np.array(z)
@@ -41,21 +41,21 @@ def vectorize_cov(tokenized_sentences: list, model: Word2Vec) -> list:
     return vectorized_sentences
 
 
-def vectorize_avg_cov(tokenized_sentences: list, model: Word2Vec) -> list:
+def vectorize_avg_std(tokenized_sentences: list, model: Word2Vec) -> list:
     vector_size = model.wv.vector_size
     vectorized_sentences = []
 
     for sentence in tqdm(
         tokenized_sentences,
-        desc="Vectorizing sentences with average and covariance",
+        desc="Vectorizing sentences with average and standard deviation",
         unit="sentence",
     ):
         temp = np.zeros(vector_size)
-        cov = []
+        word_vectors = []
         for word in sentence:
             temp += model.wv[word]
-            cov.append(model.wv[word])
-        data = np.array(cov)
+            word_vectors.append(model.wv[word])
+        data = np.array(word_vectors)
         sd = np.std(data, axis=0)
         z = temp / len(sentence)
         z = z.tolist()

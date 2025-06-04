@@ -107,7 +107,7 @@ def save_vectors(vectorisation_method, vectorize_func: Callable[[list, Word2Vec]
 
 
 vectors_avg = save_vectors("avg", processing.vectorize_avg)
-vectors_cov = save_vectors("cov", processing.vectorize_cov)
-vectors_avg_cov = save_vectors("avg_cov", processing.vectorize_avg_cov)
+vectors_std = save_vectors("std", processing.vectorize_std)
+vectors_avg_std = save_vectors("avg_std", processing.vectorize_avg_std)
 vectors_tfidf = save_vectors("tfidf", processing.vectorize_tfidf)
 vectors_max_pool = save_vectors("max_pool", processing.vectorize_max_pool)
