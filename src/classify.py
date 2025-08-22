@@ -212,7 +212,7 @@ if all_results:
     # Convert to percentages
     cm_percent = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis] * 100
 
-    plt.figure(figsize=(15, 15))  # 2:1 aspect ratio (width:height)
+    plt.figure(figsize=(15, 15), facecolor="none")
     plt.imshow(cm_percent, interpolation="nearest", cmap=plt.cm.Blues)
     plt.colorbar()
     # Extract last names from composer names
@@ -232,8 +232,10 @@ if all_results:
             fontsize=18,
         )
     plt.tight_layout()
-    plt.ylabel("True Composer", fontsize=18)
-    plt.xlabel("Predicted Composer", fontsize=18)
+    plt.ylabel("True Composer", fontsize=24)
+    plt.xlabel("Predicted Composer", fontsize=24)
+
+    plt.gca().patch.set_alpha(0)
 
     cm_plot_path = os.path.join(
         cache.FOLDER_PATH,

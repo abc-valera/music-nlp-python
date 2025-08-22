@@ -50,18 +50,16 @@ def vectorize_avg_std(tokenized_sentences: list, model: Word2Vec) -> list:
         desc="Vectorizing sentences with average and standard deviation",
         unit="sentence",
     ):
-        temp = np.zeros(vector_size)
+        vector_sum = np.zeros(vector_size)
         word_vectors = []
         for word in sentence:
-            temp += model.wv[word]
+            vector_sum += model.wv[word]
             word_vectors.append(model.wv[word])
-        data = np.array(word_vectors)
-        sd = np.std(data, axis=0)
-        z = temp / len(sentence)
-        z = z.tolist()
-        z += sd.tolist()
-        z = np.array(z)
-        vectorized_sentences.append(z)
+        word_vectors = np.array(word_vectors)
+        std = np.std(word_vectors, axis=0)
+        avg = vector_sum / len(sentence)
+        res = avg.tolist() + std.tolist()
+        vectorized_sentences.append(np.array(res))
 
     return vectorized_sentences
 

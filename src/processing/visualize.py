@@ -23,7 +23,9 @@ def visualize_vectors(
     tsne = TSNE(n_components=2, perplexity=perplexity, random_state=random_state)
     embedded_vectors = tsne.fit_transform(data_vectors)
 
-    plt.figure(figsize=figsize)
+    fig = plt.figure(figsize=figsize)
+    fig.patch.set_facecolor("none")
+
     # use default seaborn color palette
     palette = sns.color_palette("tab10")
 
